@@ -35,8 +35,16 @@ http::response<http::string_body> request_handler(http::request<http::string_bod
         res.body() = json_response.dump();
         res.prepare_payload();
         return res;
-    }else if(req.method() == http::verb::delete_){
-
+    }else if(req.method() == http::verb::delete_ && req.target() == "/user"){
+        auto json_request = nlohmann::json::parse(req.body());
+        std::string response_message = "Deleted: " + json_request.dump();
+        nlohmann::json json_response = {{"message", response_message}};
+        http::response<http::string_body> res{http::status::ok,res.version()};
+        res.set(http::field::server,"Rest_API_Server/1.0");
+        res.set(http::field::content_type,"application/json");
+        res.keep_alive(req.keep_alive());
+        res.body() = json_response.dump();
+        res.prepare_payload();
     }
     return http::response<http::string_body>{http::status::bad_request, req.version()};
 }
